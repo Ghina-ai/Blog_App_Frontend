@@ -6,17 +6,18 @@ import 'package:frontend/pages/detail.dart';
 class HomePage extends StatefulWidget {
   final VoidCallback? onSearchTap;
   final VoidCallback onWriteTap;
+
   const HomePage({
-    super.key,  
+    super.key,
     required this.onSearchTap,
     required this.onWriteTap,
   });
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   List<dynamic> posts = [];
   bool isLoading = true;
   String? errorMessage;
@@ -36,12 +37,16 @@ class _HomePageState extends State<HomePage> {
     try {
       final data = await ApiService.getPosts();
 
+      if (!mounted) return;
+
       setState(() {
         posts = data;
         isLoading = false;
       });
     } catch (e) {
       print("ERROR: $e");
+
+      if (!mounted) return;
 
       setState(() {
         errorMessage = e.toString();
@@ -137,6 +142,21 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Future<void> openDetail(dynamic post) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailPage(
+          post: post,
+        ),
+      ),
+    );
+
+    if (result == true && mounted) {
+      await loadPosts();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -196,7 +216,10 @@ class _HomePageState extends State<HomePage> {
     final featuredPost = posts.isNotEmpty ? posts[0] : null;
 
     final articlePosts = posts.length > 1
-        ? posts.sublist(1, posts.length > 3 ? 3 : posts.length)
+        ? posts.sublist(
+            1,
+            posts.length > 3 ? 3 : posts.length,
+          )
         : <dynamic>[];
 
     final forYouPosts = posts.length > 3
@@ -219,6 +242,7 @@ class _HomePageState extends State<HomePage> {
                 // =========================
                 // HEADER
                 // =========================
+
                 Row(
                   children: [
                     Container(
@@ -273,6 +297,7 @@ class _HomePageState extends State<HomePage> {
                 // =========================
                 // GREETING
                 // =========================
+
                 const Text(
                   "Hi, Ghinaa! 👋",
                   style: TextStyle(
@@ -297,22 +322,18 @@ class _HomePageState extends State<HomePage> {
                 // =========================
                 // FEATURED
                 // =========================
+
                 if (featuredPost != null)
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailPage(
-                            post: featuredPost,
-                          ),
-                        ),
-                      );
-                    },
+                    onTap: () => openDetail(featuredPost),
                     child: _featuredCard(featuredPost),
                   ),
 
                 const SizedBox(height: 25),
+
+                // =========================
+                // ARTICLE
+                // =========================
 
                 if (articlePosts.isNotEmpty)
                   Row(
@@ -320,43 +341,29 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DetailPage(
-                                  post: articlePosts[0],
-                                ),
-                              ),
-                            );
-                          },
+                          onTap: () => openDetail(articlePosts[0]),
                           child: _articleCard(articlePosts[0]),
                         ),
                       ),
+
                       const SizedBox(width: 14),
+
                       if (articlePosts.length > 1)
                         Expanded(
                           child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailPage(
-                                    post: articlePosts[1],
-                                  ),
-                                ),
-                              );
-                            },
+                            onTap: () => openDetail(articlePosts[1]),
                             child: _articleCard(articlePosts[1]),
                           ),
                         ),
                     ],
                   ),
+
                 const SizedBox(height: 30),
 
                 // =========================
                 // FOR YOU
                 // =========================
+
                 const Text(
                   "For You",
                   style: TextStyle(
@@ -381,16 +388,7 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       for (final post in forYouPosts)
                         GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DetailPage(
-                                  post: post,
-                                ),
-                              ),
-                            );
-                          },
+                          onTap: () => openDetail(post),
                           child: _forYouCard(post),
                         ),
                     ],
@@ -683,6 +681,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // =====================================================
+  // FOR YOU CARD
+  // =====================================================
+
   Widget _forYouCard(dynamic post) {
     final image = _field(post, "imageUrl");
     final category = _field(post, "categoryName", "General");
@@ -698,7 +700,6 @@ class _HomePageState extends State<HomePage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // IMAGE ARTIKEL
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: image.isNotEmpty
@@ -732,7 +733,6 @@ class _HomePageState extends State<HomePage> {
 
           const SizedBox(width: 12),
 
-          // CONTENT
           Expanded(
             child: SizedBox(
               height: 90,

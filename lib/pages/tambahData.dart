@@ -4,7 +4,12 @@ import 'package:image_picker/image_picker.dart';
 import 'package:frontend/service/api.dart';
 
 class WritePage extends StatefulWidget {
-  const WritePage({super.key});
+  final Future<void> Function()? onPostCreated;
+
+  const WritePage({
+    super.key, 
+    this.onPostCreated,
+  });
 
   @override
   State<WritePage> createState() => _WritePageState();
@@ -88,6 +93,15 @@ class _WritePageState extends State<WritePage> {
       return;
     }
 
+    if (imageBytes == null || fileName == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Silakan pilih cover artikel."),
+        ),
+      );
+      return;
+    }
+
     setState(() {
       isPublishing = true;
     });
@@ -97,8 +111,8 @@ class _WritePageState extends State<WritePage> {
         title: title,
         content: content,
         categoryId: selectedCategoryId!,
-        imageBytes: imageBytes,
-        fileName: fileName,
+        imageBytes: imageBytes!,
+        fileName: fileName!,
       );
 
       if (!mounted) return;
@@ -109,7 +123,13 @@ class _WritePageState extends State<WritePage> {
         ),
       );
 
-      Navigator.pop(context, true);
+    await Future.delayed(
+      const Duration(milliseconds: 800),
+    );
+
+    if (!mounted) return;
+
+    await widget.onPostCreated?.call();
     } catch (e) {
       if (!mounted) return;
 

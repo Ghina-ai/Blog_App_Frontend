@@ -57,6 +57,10 @@ class _EditPageState extends State<EditPage> {
       setState(() {
         imageBytes = bytes;
         fileName = image.name;
+
+        if (fileName == null || fileName!.isEmpty) {
+        fileName = "image.jpg";
+      }
       });
     } catch (e) {
       if (!mounted) return;
@@ -98,7 +102,7 @@ class _EditPageState extends State<EditPage> {
     try {
       final postId = int.parse(_field("id"));
 
-      await Api.updatePost(
+      await ApiService.updatePost(
         postId,
         title,
         content,

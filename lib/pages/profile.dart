@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/pages/detail.dart';
 import 'package:frontend/service/api.dart';
+import 'package:frontend/pages/editProfile.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -29,6 +30,8 @@ class _ProfilePageState extends State<ProfilePage> {
       final profileData = await ApiService.getProfile(userId);
       final postData = await ApiService.getUserPosts(userId);
 
+      if (!mounted) return;
+
       setState(() {
         profile = profileData;
         posts = postData;
@@ -36,6 +39,8 @@ class _ProfilePageState extends State<ProfilePage> {
       });
     } catch (e) {
       print("PROFILE ERROR: $e");
+
+      if (!mounted) return;
 
       setState(() {
         isLoading = false;
@@ -87,7 +92,11 @@ class _ProfilePageState extends State<ProfilePage> {
           shape: BoxShape.circle,
           color: Color(0xFFE5E7EA),
         ),
-        child: Icon(Icons.person, size: size * 0.65, color: Color(0xFF9AA1AB)),
+        child: Icon(
+          Icons.person,
+          size: size * 0.65,
+          color: const Color(0xFF9AA1AB),
+        ),
       );
     }
 
@@ -108,7 +117,7 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Icon(
               Icons.person,
               size: size * 0.65,
-              color: Color(0xFF9AA1AB),
+              color: const Color(0xFF9AA1AB),
             ),
           );
         },
@@ -116,12 +125,47 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Future<void> openEditProfile() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfilePage(
+          profile: profile ?? {},
+          userId: userId,
+        ),
+      ),
+    );
+
+    if (result == true && mounted) {
+      setState(() {
+        isLoading = true;
+      });
+
+      await loadProfile();
+    }
+  }
+
+  Future<void> openDetail(dynamic post) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DetailPage(post: post),
+      ),
+    );
+
+    if (result == true && mounted) {
+      await loadProfile();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Scaffold(
         backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
 
@@ -139,26 +183,22 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // COVER
               SizedBox(
                 width: double.infinity,
                 height: 230,
-                child: Stack(
-                  children: [
-                    // BACKGROUND IMAGE
-                    Image.asset(
-                      "assets/Swiss.jpg",
+                child: Image.asset(
+                  "assets/Swiss.jpg",
+                  width: double.infinity,
+                  height: 230,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
                       width: double.infinity,
                       height: 230,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: double.infinity,
-                          height: 230,
-                          color: const Color(0xFFE8E8E8),
-                        );
-                      },
-                    ),
-                  ],
+                      color: const Color(0xFFE8E8E8),
+                    );
+                  },
                 ),
               ),
 
@@ -190,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
 
-                    // USERNAME
+                    // USERNAME + EDIT
                     Transform.translate(
                       offset: const Offset(0, -40),
                       child: Row(
@@ -198,7 +238,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           Expanded(
                             child: Text(
-                              username,
+                              username.isNotEmpty ? username : "Username",
                               style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.w800,
@@ -207,26 +247,15 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
 
-                          // EDIT PROFILE
-                          OutlinedButton(
-                            onPressed: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditProfilePage(
-                                    profile: profile ?? {},
-                                    userId: userId,
-                                  ),
-                                ),
-                              );
+                          const SizedBox(width: 10),
 
-                              if (result == true) {
-                                loadProfile();
-                              }
-                            },
+                          OutlinedButton(
+                            onPressed: openEditProfile,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF20242B),
-                              side: const BorderSide(color: Color(0xFFD8DCE2)),
+                              side: const BorderSide(
+                                color: Color(0xFFD8DCE2),
+                              ),
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 16,
                                 vertical: 9,
@@ -262,7 +291,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 2),
 
-                    // JOINED
+                    // JOINED + JUMLAH ARTIKEL
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -275,7 +304,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              "Joined ${_formatJoined(createdAt)}",
+                              createdAt.isNotEmpty
+                                  ? "Joined ${_formatJoined(createdAt)}"
+                                  : "Joined -",
                               style: const TextStyle(
                                 fontSize: 13,
                                 color: Color(0xFF8A919B),
@@ -283,7 +314,9 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                         ),
+
                         const SizedBox(height: 15),
+
                         Text(
                           "${posts.length} Artikel",
                           style: const TextStyle(
@@ -297,6 +330,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 28),
 
+                    // ARTIKEL ANDA
                     const Text(
                       "Artikel Anda",
                       style: TextStyle(
@@ -319,26 +353,25 @@ class _ProfilePageState extends State<ProfilePage> {
 
                     const SizedBox(height: 18),
 
+                    // KALAU BELUM ADA ARTIKEL
                     if (posts.isEmpty)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
                         child: Center(
                           child: Text(
                             "Belum ada artikel.",
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(
+                              color: Colors.grey,
+                            ),
                           ),
                         ),
                       ),
 
+                    // LIST ARTIKEL
                     for (final post in posts)
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => DetailPage(post: post),
-                            ),
-                          );
+                          openDetail(post);
                         },
                         child: _articleCard(post),
                       ),
@@ -360,7 +393,9 @@ class _ProfilePageState extends State<ProfilePage> {
     final title = _postField(post, "title");
     final username = _postField(post, "username");
     final profileImage = _postField(post, "profileImage");
-    final date = _formatJoined(_postField(post, "createdAt"));
+    final date = _formatJoined(
+      _postField(post, "createdAt"),
+    );
 
     return Container(
       width: double.infinity,
@@ -369,7 +404,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // IMAGE
+          // ARTICLE IMAGE
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: image.isNotEmpty
@@ -403,7 +438,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
           const SizedBox(width: 12),
 
-          // TEXT
+          // ARTICLE TEXT
           Expanded(
             child: SizedBox(
               height: 90,
@@ -439,13 +474,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   Row(
                     children: [
-                      _profileImage(profileImage, size: 18),
+                      _profileImage(
+                        profileImage,
+                        size: 18,
+                      ),
 
                       const SizedBox(width: 5),
 
                       Flexible(
                         child: Text(
-                          username.isNotEmpty ? username : "Ghinaa",
+                          username.isNotEmpty
+                              ? username
+                              : "Ghinaa",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -459,7 +499,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
                       const Text(
                         "•",
-                        style: TextStyle(fontSize: 9, color: Color(0xFFB8BEC7)),
+                        style: TextStyle(
+                          fontSize: 9,
+                          color: Color(0xFFB8BEC7),
+                        ),
                       ),
 
                       const SizedBox(width: 7),
@@ -478,181 +521,6 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class EditProfilePage extends StatefulWidget {
-  final Map<String, dynamic> profile;
-  final int userId;
-
-  const EditProfilePage({
-    super.key,
-    required this.profile,
-    required this.userId,
-  });
-
-  @override
-  State<EditProfilePage> createState() => _EditProfilePageState();
-}
-
-class _EditProfilePageState extends State<EditProfilePage> {
-  late TextEditingController usernameController;
-  late TextEditingController bioController;
-
-  bool isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    usernameController = TextEditingController(
-      text: widget.profile["username"]?.toString() ?? "",
-    );
-
-    bioController = TextEditingController(
-      text: widget.profile["bio"]?.toString() ?? "",
-    );
-  }
-
-  @override
-  void dispose() {
-    usernameController.dispose();
-    bioController.dispose();
-    super.dispose();
-  }
-
-  Future<void> saveProfile() async {
-    setState(() {
-      isSaving = true;
-    });
-
-    try {
-      await ApiService.updateProfile(
-        widget.userId,
-        usernameController.text.trim(),
-        bioController.text.trim(),
-      );
-
-      if (!mounted) return;
-
-      Navigator.pop(context, true);
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Gagal menyimpan profile: $e")));
-    } finally {
-      if (mounted) {
-        setState(() {
-          isSaving = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            size: 19,
-            color: Colors.black,
-          ),
-        ),
-        title: const Text(
-          "Edit Profile",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(22),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Username",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-
-            const SizedBox(height: 8),
-
-            TextField(
-              controller: usernameController,
-              decoration: InputDecoration(
-                hintText: "Masukkan username",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 22),
-
-            const Text(
-              "Bio",
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-            ),
-
-            const SizedBox(height: 8),
-
-            TextField(
-              controller: bioController,
-              maxLines: 4,
-              decoration: InputDecoration(
-                hintText: "Ceritakan tentang kamu...",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isSaving ? null : saveProfile,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF20242B),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: isSaving
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Text(
-                        "Save Changes",
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

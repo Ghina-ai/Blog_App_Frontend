@@ -1,7 +1,5 @@
-// LOGIN
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:frontend/pages/home.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,164 +18,226 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Image.asset(
-                  'assets/image.png',
-                  width: 250,
-                  height: 200,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              SizedBox(height: 5),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 32,
+              vertical: 20,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-              // JUDUL
-              Text(
-                "Login",
-                style: GoogleFonts.dmSans(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 27, 60, 81),
-                ),
-              ),
+                  const SizedBox(height: 10),
 
-              SizedBox(height: 5),
-
-              Text(
-                "Please Sign in to continue.",
-                style: TextStyle(color: Color.fromARGB(225, 27, 60, 81)),
-              ),
-
-              SizedBox(height: 25),
-
-              // USERNAME
-              TextField(
-                controller: usernameController,
-                decoration: InputDecoration(
-                  hintText: "Masukkan Username",
-                  labelText: "Username",
-                  prefixIcon: Icon(Icons.person),
-                  filled: true,
-                  fillColor: Color.fromARGB(255, 248, 248, 248),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 15),
-
-              // PASSWORD
-              TextField(
-                controller: passwordController,
-                obscureText: togglePass,
-                decoration: InputDecoration(
-                  hintText: "Masukkan Password",
-                  labelText: "Password",
-                  prefixIcon: Icon(Icons.lock),
-                  filled: true,
-                  fillColor: Color.fromARGB(255, 248, 248, 248),
-
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        togglePass = !togglePass;
-                      });
-                    },
-                    icon: Icon(
-                      togglePass ? Icons.visibility_off : Icons.visibility,
+                  Text(
+                    "Welcome Back!",
+                    style: GoogleFonts.dmSans(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xff1B3C51),
                     ),
                   ),
 
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
+                  const SizedBox(height: 6),
 
-              SizedBox(height: 5),
-
-              // CHECKBOX
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Remeinder me nextime",
-                    style: TextStyle(fontSize: 14, color: Color(0xff333333)),
+                  const Text(
+                    "Please sign in to continue.",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xff71808D),
+                    ),
                   ),
-                  Transform.scale(
-                    scale: .65,
-                    child: Switch(
-                      value: rememberMe,
-                      activeColor: Color.fromARGB(255, 214, 208, 208),
-                      activeTrackColor: Color.fromARGB(255, 0, 0, 0),
-                      onChanged: (value) {
-                        setState(() {
-                          rememberMe = value;
-                        });
+
+                  const SizedBox(height: 28),
+
+                  const Text(
+                    "Username",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff333333),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  TextField(
+                    controller: usernameController,
+                    decoration: InputDecoration(
+                      hintText: "Enter your username",
+                      prefixIcon: const Icon(
+                        Icons.person_outline,
+                        color: Color(0xff71808D),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffF7F8F9),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    "Password",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff333333),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  TextField(
+                    controller: passwordController,
+                    obscureText: togglePass,
+                    decoration: InputDecoration(
+                      hintText: "Enter your password",
+                      prefixIcon: const Icon(
+                        Icons.lock_outline,
+                        color: Color(0xff71808D),
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            togglePass = !togglePass;
+                          });
+                        },
+                        icon: Icon(
+                          togglePass
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: const Color(0xff71808D),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: const Color(0xffF7F8F9),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Remember me",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xff555555),
+                        ),
+                      ),
+                      Switch(
+                        value: rememberMe,
+                        activeThumbColor: const Color(0xff1D4055),
+                        activeTrackColor: const Color(0xffD8E0E5),
+                        onChanged: (value) {
+                          setState(() {
+                            rememberMe = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacementNamed(
+                          context,
+                          "/home",
+                          arguments: {
+                            "nama": usernameController.text.isEmpty
+                                ? "User"
+                                : usernameController.text,
+                          },
+                        );
                       },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff1D4055),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: const Text(
+                        "Sign In",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't have an account? ",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Color(0xff666666),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacementNamed(
+                            context,
+                            "/register",
+                          );
+                        },
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff1D4055),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              SizedBox(height: 15),
-
-              // BUTTON
-              SizedBox(
-                width: double.infinity,
-                height: 40,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      "/home",
-                      arguments: {"nama": usernameController.text},
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xff1D4055),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: Text("Sign In", style: TextStyle(color: Colors.white)),
-                ),
-              ),
-              SizedBox(height: 5),
-
-              // BAWAH BUTTON
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have account? ",
-                    style: TextStyle(color: Colors.black, fontSize: 12),
-                  ),
-
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        "/home",
-                        arguments: {"nama": "ghinaa", "umur": 18},
-                      );
-                    },
-                    child: const Text('Sign Up'),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 }
