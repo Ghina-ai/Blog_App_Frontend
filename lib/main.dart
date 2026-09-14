@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:animated_notch_bottom_bar/animated_notch_bottom_bar/animated_notch_bottom_bar.dart';
-
 import 'pages/home.dart';
+import 'pages/sreach.dart';
+import 'pages/detail.dart';
+import 'pages/profile.dart';
+import 'pages/tambahData.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,9 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Blog App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const MainPage(),
     );
   }
@@ -31,14 +32,38 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final PageController _pageController = PageController(initialPage: 0);
+  final PageController pageController = PageController(initialPage: 0);
+  final NotchBottomBarController controller = NotchBottomBarController(
+    index: 0,
+  );
 
-  final NotchBottomBarController _controller =
-      NotchBottomBarController(index: 0);
+  int currentIndex = 0;
+
+  void goToPage(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+
+    controller.jumpTo(index);
+    pageController.jumpToPage(index);
+  }
+
+  void openWritePage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const WritePage(),
+      ),
+    );
+
+    if (result == true) {
+      setState(() {});
+    }
+  }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    pageController.dispose();
     super.dispose();
   }
 
@@ -46,21 +71,30 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: const [
-          HomePage(),
-          SearchPage(),
-          BookmarkPage(),
-          ProfilePage(),
+        controller: pageController,
+        onPageChanged: (index) {
+          setState(() {
+            currentIndex = index;
+          });
+          controller.jumpTo(index);
+        },
+        children: [
+          HomePage(
+            onSearchTap: () {
+              goToPage(1);
+            },
+            onWriteTap: openWritePage,
+          ),
+          const SearchPage(),
+          const WritePage(),
+          const ProfilePage(),
         ],
       ),
 
       extendBody: true,
 
       bottomNavigationBar: AnimatedNotchBottomBar(
-        notchBottomBarController: _controller,
-        
+        notchBottomBarController: controller,
         kIconSize: 24,
         kBottomRadius: 28,
         color: Colors.white,
@@ -70,98 +104,44 @@ class _MainPageState extends State<MainPage> {
 
         bottomBarItems: const [
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.home_outlined,
-              color: Colors.grey,
-            ),
-            activeItem: Icon(
-              Icons.home,
-              color: Colors.blue,
-            ),
+            inActiveItem: Icon(Icons.home_outlined, color: Colors.grey),
+            activeItem: Icon(Icons.home, color: Colors.blue),
             itemLabel: 'Home',
           ),
-
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.search,
-              color: Colors.grey,
-            ),
-            activeItem: Icon(
-              Icons.search,
-              color: Colors.blue,
-            ),
+            inActiveItem: Icon(Icons.search, color: Colors.grey),
+            activeItem: Icon(Icons.search, color: Colors.blue),
             itemLabel: 'Search',
           ),
-
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.bookmark_border,
-              color: Colors.grey,
-            ),
-            activeItem: Icon(
-              Icons.bookmark,
-              color: Colors.blue,
-            ),
-            itemLabel: 'Bookmark',
+            inActiveItem: Icon(Icons.add, color: Colors.grey),
+            activeItem: Icon(Icons.add, color: Colors.blue),
+            itemLabel: 'Write',
           ),
-
           BottomBarItem(
-            inActiveItem: Icon(
-              Icons.person_outline,
-              color: Colors.grey,
-            ),
-            activeItem: Icon(
-              Icons.person,
-              color: Colors.blue,
-            ),
+            inActiveItem: Icon(Icons.person_outline, color: Colors.grey),
+            activeItem: Icon(Icons.person, color: Colors.blue),
             itemLabel: 'Profile',
           ),
         ],
 
         onTap: (index) {
-          _pageController.jumpToPage(index);
+          goToPage(index);
         },
       ),
     );
   }
 }
 
-
 // ===============================
 // HALAMAN LAIN
 // ===============================
-
-class SearchPage extends StatelessWidget {
-  const SearchPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Search'),
-    );
-  }
-}
-
 
 class BookmarkPage extends StatelessWidget {
   const BookmarkPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Bookmark'),
-    );
-  }
-}
-
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Profile'),
-    );
+    return const Center(child: Text('Bookmark'));
   }
 }
