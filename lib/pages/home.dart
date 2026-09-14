@@ -1,7 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<dynamic> posts = [];
+  bool isLoading = false;
+  String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    getPosts();
+  }
+
+Future<void> getPosts() async {
+  try {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    final response = await http.get(
+      Uri.parse("http://localhost:3000/api/v1/posts"),
+    );
+
+    print("STATUS: ${response.statusCode}");
+    print("BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      setState(() {
+        posts = data["data"]["posts"];
+        isLoading = false;
+      });
+
+      print("JUMLAH POSTS: ${posts.length}");
+    } else {
+      setState(() {
+        errorMessage = "Gagal mengambil data";
+        isLoading = false;
+      });
+    }
+  } catch (e) {
+    setState(() {
+      errorMessage = e.toString();
+      isLoading = false;
+    });
+
+    print("ERROR: $e");
+  }
+}
 
   @override
   Widget build(BuildContext context) {
