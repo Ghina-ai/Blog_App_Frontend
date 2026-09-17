@@ -264,7 +264,7 @@ class HomePageState extends State<HomePage> {
                     const SizedBox(width: 8),
 
                     const Text(
-                      "Blog",
+                      "Artikula",
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,

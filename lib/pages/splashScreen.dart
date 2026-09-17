@@ -19,7 +19,7 @@ class OpeningPage extends StatelessWidget {
 
               // JUDUL
               Text(
-                "Welcome to Blog App",
+                "Welcome to Artikula",
                 textAlign: TextAlign.center,
                 style: GoogleFonts.dmSans(
                   fontSize: 28,
