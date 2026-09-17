@@ -84,69 +84,156 @@ class ApiService {
     }
   }
 
-  // CREATE POST
-  static Future<void> createPost({
-    required String title,
-    required String content,
-    required int categoryId, Uint8List? imageBytes, String? fileName,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/api/v1/posts"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "title": title,
-          "content": content,
-          "categoryId": categoryId,
-        }),
+  // CREATE POSTS
+static Future<void> createPost({
+  required String title,
+  required String content,
+  required int categoryId,
+  required Uint8List imageBytes,
+  required String fileName,
+}) async {
+  try {
+    final request = http.MultipartRequest(
+      "POST",
+      Uri.parse("$baseUrl/api/v1/posts"),
+    );
+
+    request.fields["title"] = title;
+    request.fields["content"] = content;
+    request.fields["categoryId"] = categoryId.toString();
+
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        "image",
+        imageBytes,
+        filename: fileName,
+      ),
+    );
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    print("CREATE POST STATUS: ${response.statusCode}");
+    print("CREATE POST RESPONSE: $responseBody");
+
+    if (response.statusCode != 201) {
+      throw Exception(
+        "Gagal membuat artikel: ${response.statusCode}",
       );
-
-      print("CREATE POST STATUS: ${response.statusCode}");
-      print("CREATE POST RESPONSE: ${response.body}");
-
-      if (response.statusCode != 201) {
-        throw Exception(
-          "Gagal membuat artikel: ${response.statusCode}",
-        );
-      }
-    } catch (e) {
-      print("CREATE POST ERROR: $e");
-      throw Exception("Gagal membuat artikel: $e");
     }
+  } catch (e) {
+    print("CREATE POST ERROR: $e");
+    throw Exception("Gagal membuat artikel: $e");
   }
-
+}
  
   // UPDATE PROFILE
-  static Future<void> updateProfile(
-    int userId,
-    String username,
-    String bio,
-  ) async {
+static Future<void> updateProfile(
+  int userId,
+  String username,
+  String bio, {
+  Uint8List? imageBytes,
+  String? fileName,
+}) async {
+  try {
+    final request = http.MultipartRequest(
+      "PATCH",
+      Uri.parse("$baseUrl/api/v1/users/$userId/profile"),
+    );
+
+    request.fields["username"] = username;
+    request.fields["bio"] = bio;
+
+    if (imageBytes != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          "image",
+          imageBytes,
+          filename: fileName ?? "profile.jpg",
+        ),
+      );
+    }
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    print("UPDATE PROFILE STATUS: ${response.statusCode}");
+    print("UPDATE PROFILE RESPONSE: $responseBody");
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Gagal mengupdate profile: ${response.statusCode}",
+      );
+    }
+  } catch (e) {
+    print("UPDATE PROFILE ERROR: $e");
+    throw Exception("Gagal mengupdate profile: $e");
+  }
+}
+
+  //UPDATE POST 
+  static Future<void> updatePost(
+  int postId,
+  String title,
+  String content, {
+  Uint8List? imageBytes,
+  String? fileName,
+}) async {
+  try {
+    final request = http.MultipartRequest(
+      "PATCH",
+      Uri.parse("$baseUrl/api/v1/posts/$postId"),
+    );
+
+    request.fields["title"] = title;
+    request.fields["content"] = content;
+
+    if (imageBytes != null && fileName != null) {
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          "image",
+          imageBytes,
+          filename: fileName,
+        ),
+      );
+    }
+
+    final response = await request.send();
+    final responseBody = await response.stream.bytesToString();
+
+    print("UPDATE POST STATUS: ${response.statusCode}");
+    print("UPDATE POST RESPONSE: $responseBody");
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        "Gagal mengupdate artikel: ${response.statusCode}",
+      );
+    }
+  } catch (e) {
+    print("UPDATE POST ERROR: $e");
+    throw Exception("Gagal mengupdate artikel: $e");
+  }
+}
+
+  // DELETE POST
+  static Future<void> deletePost(int postId) async {
     try {
-      final response = await http.patch(
-        Uri.parse("$baseUrl/api/v1/users/$userId/profile"),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode({
-          "username": username,
-          "bio": bio,
-        }),
+      final response = await http.delete(
+        Uri.parse("$baseUrl/api/v1/posts/$postId"),
       );
 
-      print("UPDATE PROFILE STATUS: ${response.statusCode}");
-      print("UPDATE PROFILE RESPONSE: ${response.body}");
+      print("DELETE POST STATUS: ${response.statusCode}");
+      print("DELETE POST RESPONSE: ${response.body}");
 
       if (response.statusCode != 200) {
         throw Exception(
-          "Gagal mengupdate profile: ${response.statusCode}",
+          "Gagal menghapus artikel: ${response.statusCode}",
         );
       }
     } catch (e) {
-      print("UPDATE PROFILE ERROR: $e");
-      throw Exception("Gagal mengupdate profile: $e");
+      print("DELETE POST ERROR: $e");
+      throw Exception("Gagal menghapus artikel: $e");
     }
   }
+
 }
